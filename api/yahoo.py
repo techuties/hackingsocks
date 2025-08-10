@@ -25,10 +25,13 @@ cache = CsvCache()  # defaults to api/cache/
 
 
 def _df_to_json(df: pd.DataFrame) -> Dict[str, Any]:
+    payload = df.to_dict(orient="split")
+    # Ensure payload is fully JSON-serializable (timestamps, numpy types, etc.)
+    payload = _make_json_safe(payload)
     return {
         "__type__": "dataframe",
         "orient": "split",
-        "payload": df.to_dict(orient="split"),
+        "payload": payload,
     }
 
 
