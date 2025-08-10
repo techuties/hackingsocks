@@ -1,4 +1,0 @@
----
-alwaysApply: true
----
-Always use variables instead of the environment setting. 
