@@ -20,8 +20,16 @@ Docs: https://www.alphavantage.co/documentation/
 """
 
 from typing import Optional, Dict, Any, List
+import os
 import requests
-from .csv_cache import CsvCache
+try:
+    # Prefer relative import when used as a package (api.alphavantag)
+    from .csv_cache import CsvCache
+except Exception:  # fallback for running as a script from repo root
+    try:
+        from api.csv_cache import CsvCache  # type: ignore
+    except Exception:
+        from csv_cache import CsvCache  # type: ignore
 
 BASE_URL = "https://www.alphavantage.co/query"
 
@@ -52,19 +60,32 @@ class AlphaVantageClient:
             req_params["apikey"] = self.api_key
             resp = requests.get(BASE_URL, params=req_params, timeout=self.timeout)
             resp.raise_for_status()
-            return resp.json()
+            try:
+                return resp.json()
+            except Exception:
+                # Return a structured error without caching broken content
+                text_preview = resp.text[:500] if hasattr(resp, "text") else ""
+                raise RuntimeError(
+                    f"AlphaVantage non-JSON response (status={resp.status_code}): {text_preview}"
+                )
 
         if self.enable_cache and self.cache is not None:
-            data, _ = self.cache.get_or_fetch(
-                table_name=self.cache_table_name,
-                source=source,
-                params=cache_params,
-                fetch_fn=fetch,
-                ttl_seconds=self.cache_ttl_seconds,
-            )
-            return data
+            try:
+                data, _ = self.cache.get_or_fetch(
+                    table_name=self.cache_table_name,
+                    source=source,
+                    params=cache_params,
+                    fetch_fn=fetch,
+                    ttl_seconds=self.cache_ttl_seconds,
+                )
+                return data
+            except Exception as exc:
+                return {"error": str(exc)}
         else:
-            return fetch()
+            try:
+                return fetch()
+            except Exception as exc:
+                return {"error": str(exc)}
 
     def get_news_sentiment(self, tickers: Optional[List[str]] = None, topics: Optional[List[str]] = None, time_from: Optional[str] = None, time_to: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -232,23 +253,23 @@ class AlphaVantageClient:
         }
         return self._get(params)
 
-# Example usage:
-# av = AlphaVantageClient(api_key="YOUR_API_KEY")
-# print(av.get_company_overview("AAPL"))
-
-av = AlphaVantageClient(api_key="3B10HMD7VDM29PS9")
-print(av.get_company_overview("AAPL"))
-print(av.get_news_sentiment(tickers=["AAPL", "MSFT"]))
-
-print(av.get_etf_profile("SPY"))
-print(av.get_etf_holdings("SPY"))
-print(av.get_dividends("AAPL"))
-print(av.get_splits("AAPL"))
-print(av.get_income_statement("AAPL"))
-print(av.get_balance_sheet("AAPL"))
-print(av.get_cash_flow("AAPL"))
-print(av.get_earnings("AAPL"))
-print(av.get_earnings_estimates("AAPL"))
-print(av.get_listing_status("active"))
-print(av.get_earnings_calendar(horizon="3month", symbol="AAPL"))
-print(av.get_ipo_calendar(horizon="3month"))
+if __name__ == "__main__":
+    api_key = os.environ.get("ALPHAVANTAGE_API_KEY", "")
+    if not api_key:
+        print("Set ALPHAVANTAGE_API_KEY env var to run examples.")
+    else:
+        av = AlphaVantageClient(api_key=api_key)
+        print(av.get_company_overview("AAPL"))
+        print(av.get_news_sentiment(tickers=["AAPL", "MSFT"]))
+        print(av.get_etf_profile("SPY"))
+        print(av.get_etf_holdings("SPY"))
+        print(av.get_dividends("AAPL"))
+        print(av.get_splits("AAPL"))
+        print(av.get_income_statement("AAPL"))
+        print(av.get_balance_sheet("AAPL"))
+        print(av.get_cash_flow("AAPL"))
+        print(av.get_earnings("AAPL"))
+        print(av.get_earnings_estimates("AAPL"))
+        print(av.get_listing_status("active"))
+        print(av.get_earnings_calendar(horizon="3month", symbol="AAPL"))
+        print(av.get_ipo_calendar(horizon="3month"))
