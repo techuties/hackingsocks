@@ -21,7 +21,7 @@ Docs: https://www.alphavantage.co/documentation/
 
 from typing import Optional, Dict, Any, List
 import requests
-from csv_cache import CsvCache
+from .csv_cache import CsvCache
 
 BASE_URL = "https://www.alphavantage.co/query"
 
@@ -33,7 +33,7 @@ class AlphaVantageClient:
         enable_cache: bool = True,
         cache_ttl_seconds: Optional[int] = 24 * 60 * 60,
         cache_table_name: str = "alphavantage",
-        cache_directory: str = "cache",
+        cache_directory: Optional[str] = None,
     ) -> None:
         self.api_key = api_key
         self.timeout = timeout
@@ -239,6 +239,7 @@ class AlphaVantageClient:
 av = AlphaVantageClient(api_key="3B10HMD7VDM29PS9")
 print(av.get_company_overview("AAPL"))
 print(av.get_news_sentiment(tickers=["AAPL", "MSFT"]))
+
 print(av.get_etf_profile("SPY"))
 print(av.get_etf_holdings("SPY"))
 print(av.get_dividends("AAPL"))
