@@ -1,0 +1,26 @@
+# --- Core app ---
+streamlit>=1.33
+requests>=2.31
+plotly>=5.22
+pandas>=2.2
+numpy>=1.26
+
+# --- PDF parsing & RAG ---
+pymupdf>=1.23           # PyMuPDF
+pdfplumber>=0.11
+sentence-transformers>=2.7
+torch                   # For sentence-transformers; pick CUDA build if you have a GPU
+chromadb>=0.5.0
+hnswlib>=0.8.0
+
+# --- Forecasting ---
+statsmodels>=0.14
+
+# --- Optional OCR for scanned PDFs ---
+# ocrmypdf>=15.0
+# pytesseract>=0.3.10
+# NOTE: OCR requires system deps:
+#   sudo apt-get update && sudo apt-get install -y tesseract-ocr ghostscript qpdf
+
+# --- Dev/Notebook (optional) ---
+# jupyterlab>=4.0
