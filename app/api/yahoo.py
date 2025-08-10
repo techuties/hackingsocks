@@ -5,13 +5,7 @@ from typing import Any, Dict, Tuple, Union
 from datetime import date, datetime
 
 # Use CsvCache to persist results under api/cache/
-try:
-    from .csv_cache import CsvCache
-except Exception:
-    try:
-        from api.csv_cache import CsvCache  # type: ignore
-    except Exception:
-        from csv_cache import CsvCache  # type: ignore
+from csv_cache import CsvCache  # type: ignore
 
 asset = "MSFT"
 start_date = "2024-01-01"
