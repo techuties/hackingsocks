@@ -2,6 +2,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from typing import Any, Dict, Tuple, Union
+from datetime import date, datetime
 
 # Use CsvCache to persist results under api/cache/
 try:
@@ -45,12 +46,27 @@ def _make_json_safe(value: Any) -> Any:
         return {str(k): _make_json_safe(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
         return [_make_json_safe(v) for v in value]
+    # pandas containers
+    if isinstance(value, pd.Series):
+        return _make_json_safe(value.to_dict())
+    # numpy containers
+    if isinstance(value, np.ndarray):
+        return [_make_json_safe(v) for v in value.tolist()]
     if isinstance(value, (np.integer,)):
         return int(value)
     if isinstance(value, (np.floating,)):
         return float(value)
     if isinstance(value, (np.bool_,)):
         return bool(value)
+    # datetime-like
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    try:
+        # numpy datetime64
+        if isinstance(value, np.datetime64):
+            return pd.Timestamp(value).isoformat()
+    except Exception:
+        pass
     if isinstance(value, (pd.Timestamp,)):
         return value.isoformat()
     if isinstance(value, (pd.Timedelta,)):
