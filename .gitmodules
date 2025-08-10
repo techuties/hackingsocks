@@ -1,0 +1,3 @@
+[submodule "00_dataset/financebench"]
+	path = 00_dataset/financebench
+	url = https://github.com/patronus-ai/financebench.git
