@@ -254,7 +254,7 @@ class AlphaVantageClient:
         return self._get(params)
 
 if __name__ == "__main__":
-    api_key = os.environ.get("ALPHAVANTAGE_API_KEY", "")
+    api_key = os.environ.get("ALPHAVANTAGE_API_KEY", "3B10HMD7VDM29PS9")
     if not api_key:
         print("Set ALPHAVANTAGE_API_KEY env var to run examples.")
     else:
